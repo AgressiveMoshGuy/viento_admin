@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% load catalog_admin_extras %}
+
+{% block content %}
+<div class="catalog-page">
+  {% include "admin/catalog_admin/partials/catalog_nav.html" %}
+
+  <div class="catalog-panel">
+    <h1>Модерация предложенных фильтров</h1>
+    <p class="catalog-lead">
+      Очередь из <code>GET /api/admin/filter-suggestions</code>.
+      Одобрение/отклонение — <code>POST /api/admin/filter-suggestions/{id}</code>.
+    </p>
+
+    <form method="get" class="catalog-moderation-filters">
+      <label>
+        Статус
+        <select name="status">
+          <option value="" {% if not status %}selected{% endif %}>Все</option>
+          <option value="pending" {% if status == "pending" %}selected{% endif %}>pending</option>
+          <option value="approved" {% if status == "approved" %}selected{% endif %}>approved</option>
+          <option value="rejected" {% if status == "rejected" %}selected{% endif %}>rejected</option>
+        </select>
+      </label>
+      <label>
+        Категория (slug)
+        <input type="text" name="category" value="{{ category }}" placeholder="axial_fans">
+      </label>
+      <button type="submit">Фильтровать</button>
+      <a class="catalog-secondary-link" href="{% url 'admin:suggest_filter' %}">+ Предложить фильтр</a>
+    </form>
+
+    {% if suggestions %}
+      <div class="catalog-table-wrap">
+        <table class="catalog-moderation-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Категория</th>
+              <th>Ключ</th>
+              <th>Тип</th>
+              <th>Название</th>
+              <th>Значения</th>
+              <th>Статус</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for suggestion in suggestions %}
+            <tr>
+              <td>{{ suggestion.id }}</td>
+              <td>{{ suggestion.category_slug }}</td>
+              <td><code>{{ suggestion.filter_key }}</code></td>
+              <td>{{ suggestion.filter_type }}</td>
+              <td>{{ suggestion.filter_label }}</td>
+              <td><pre class="catalog-filters-json">{{ suggestion.suggested_values|pretty_json }}</pre></td>
+              <td>
+                <span class="catalog-status catalog-status--{{ suggestion.status|default:'unknown' }}">
+                  {{ suggestion.status|default:"—" }}
+                </span>
+              </td>
+              <td class="catalog-actions-cell">
+                {% if suggestion.status != "approved" %}
+                <form method="post" class="catalog-inline-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="suggestion_id" value="{{ suggestion.id }}">
+                  <input type="hidden" name="next_status" value="approved">
+                  <button type="submit">Одобрить</button>
+                </form>
+                {% endif %}
+                {% if suggestion.status != "rejected" %}
+                <form method="post" class="catalog-inline-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="suggestion_id" value="{{ suggestion.id }}">
+                  <input type="hidden" name="next_status" value="rejected">
+                  <button type="submit">Отклонить</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="catalog-empty">Предложений пока нет или API вернул пустой список.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

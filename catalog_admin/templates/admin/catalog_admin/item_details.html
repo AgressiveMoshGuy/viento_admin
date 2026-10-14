@@ -1,0 +1,37 @@
+{% extends "admin/base_site.html" %}
+{% load catalog_admin_extras %}
+
+{% block content %}
+<div class="catalog-page">
+  {% include "admin/catalog_admin/partials/catalog_nav.html" %}
+
+  <div class="catalog-panel">
+    <h1>Карточка товара: {{ sku }}</h1>
+    <p class="catalog-lead">
+      {% if item.id %}
+        <a href="{% url 'admin:catalog_edit_item' %}?item_id={{ item.id }}">Редактировать</a>
+        ·
+      {% endif %}
+      <a href="{% url 'admin:catalog_items' %}">К списку товаров</a>
+    </p>
+
+    {% if item %}
+      <table class="catalog-items-table">
+        <tr><th>ID</th><td>{{ item.id }}</td></tr>
+        <tr><th>SKU</th><td>{{ item.sku }}</td></tr>
+        <tr><th>Название</th><td>{{ item.name }}</td></tr>
+        <tr><th>Описание</th><td>{{ item.description }}</td></tr>
+        <tr><th>Категория ID</th><td>{{ item.category_id }}</td></tr>
+        <tr><th>Цвет</th><td>{{ item.color }}</td></tr>
+        <tr><th>Материал</th><td>{{ item.material }}</td></tr>
+        <tr><th>Вес</th><td>{{ item.weight }}</td></tr>
+        <tr><th>Габариты</th><td>{{ item.height }} x {{ item.width }} x {{ item.length }}</td></tr>
+        <tr><th>Цена</th><td>{{ item.price }}</td></tr>
+        <tr><th>Свойства (filters)</th><td><pre class="catalog-filters-json">{{ item.filters|pretty_json }}</pre></td></tr>
+      </table>
+    {% else %}
+      <p class="catalog-empty">Товар не получен.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+<div class="catalog-shortcut-card">
+  <strong>Каталог:</strong>
+  <a href="{% url 'admin:catalog_items' %}">Список товаров и разделы каталога</a>
+</div>
+{{ block.super }}
+{% endblock %}

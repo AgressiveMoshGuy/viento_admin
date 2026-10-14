@@ -1,0 +1,7 @@
+<nav class="catalog-nav" aria-label="Разделы каталога">
+  <a class="catalog-nav__link{% if active_nav == 'items' %} catalog-nav__link--active{% endif %}" href="{% url 'admin:catalog_items' %}">Список товаров</a>
+  <a class="catalog-nav__link{% if active_nav == 'add' %} catalog-nav__link--active{% endif %}" href="{% url 'admin:catalog_add_item' %}">Добавить товар</a>
+  <a class="catalog-nav__link{% if active_nav == 'edit' %} catalog-nav__link--active{% endif %}" href="{% url 'admin:catalog_edit_item' %}">Редактировать товар (по item_id)</a>
+  <a class="catalog-nav__link{% if active_nav == 'suggest' %} catalog-nav__link--active{% endif %}" href="{% url 'admin:suggest_filter' %}">Предложить новый фильтр</a>
+  <a class="catalog-nav__link{% if active_nav == 'moderate' %} catalog-nav__link--active{% endif %}" href="{% url 'admin:filter_suggestions' %}">Модерация предложенных фильтров</a>
+</nav>

@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+{% load static catalog_admin_extras %}
+
+{% block content %}
+<div class="catalog-page">
+  {% include "admin/catalog_admin/partials/catalog_nav.html" %}
+
+  <h1>Список товаров</h1>
+  <p class="catalog-lead">Каталог поверх Go API: поиск, категории, фасеты и пагинация.</p>
+
+  {% include "admin/catalog_admin/partials/item_search_form.html" %}
+
+  <p class="catalog-meta">Всего по API: {{ total }} | Страница: {{ page }}{% if total_pages %} / {{ total_pages }}{% endif %}</p>
+
+  <div class="catalog-layout">
+    {% include "admin/catalog_admin/partials/category_tree.html" %}
+
+    <div class="catalog-panel catalog-panel--items">
+      {% include "admin/catalog_admin/partials/item_table.html" %}
+      {% include "admin/catalog_admin/partials/item_pagination.html" %}
+    </div>
+
+    {% include "admin/catalog_admin/partials/filters_panel.html" %}
+  </div>
+
+  {{ filter_values_by_key|json_script:"filter-values-by-key" }}
+  <script src="{% static 'catalog_admin/items_list.js' %}" defer></script>
+</div>
+{% endblock %}

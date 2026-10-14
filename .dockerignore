@@ -1,0 +1,17 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.py[cod]
+db.sqlite3
+*.sqlite3
+*.tar
+alpine-admin.tar
+.env
+.env.*
+*.md
+.DS_Store
+.vscode
+.idea
+staticfiles

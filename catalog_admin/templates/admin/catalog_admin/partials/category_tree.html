@@ -1,0 +1,12 @@
+<div class="catalog-panel">
+  <h3>Дерево категорий</h3>
+  {% if category_tree %}
+    <ul>
+      {% for node in category_tree %}
+        {% include "admin/catalog_admin/partials/category_node.html" with node=node selected_category_id=selected_category_id %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Нет данных по категориям.</p>
+  {% endif %}
+</div>

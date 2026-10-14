@@ -1,0 +1,17 @@
+<form method="get" class="catalog-search-form">
+  <div class="catalog-form-grid">
+    <div>{{ form.q.label_tag }} {{ form.q }}</div>
+    <div>{{ form.sort.label_tag }} {{ form.sort }}</div>
+    <div>{{ form.limit.label_tag }} {{ form.limit }}</div>
+  </div>
+  <input type="hidden" name="filter_key" id="id_filter_key_select" value="{{ selected_filter_key }}">
+  <input type="hidden" name="filter_value" id="id_filter_value_select" value="{{ selected_filter_value }}">
+  <input type="hidden" name="category_id" id="id_category_id_select" value="{{ selected_category_id|default_if_none:'' }}">
+  <input type="hidden" name="page" id="id_page_hidden" value="1">
+  <input type="hidden" name="filter_min" id="id_filter_min" value="{{ selected_filter_min|default_if_none:'' }}">
+  <input type="hidden" name="filter_max" id="id_filter_max" value="{{ selected_filter_max|default_if_none:'' }}">
+  <input type="hidden" name="filters_json" id="id_filters_json" value="{{ selected_filters_json }}">
+  <p class="catalog-apply-row">
+    <button type="submit" id="apply_filters_btn">Применить</button>
+  </p>
+</form>

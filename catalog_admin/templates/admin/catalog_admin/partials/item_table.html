@@ -1,0 +1,75 @@
+{% load catalog_admin_extras %}
+
+{% if items %}
+  <div class="catalog-items-toolbar">
+    <button type="button" id="toggle_table_expand_btn" class="catalog-expand-btn">Сжать колонки</button>
+    <button type="button" id="toggle_column_picker_btn" class="catalog-expand-btn">Скрыть колонки</button>
+  </div>
+  <div id="column_picker_panel" class="catalog-column-picker" hidden>
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="id" checked> ID</label>
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="sku" checked> SKU</label>
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="name" checked> Название</label>
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="category_id" checked> Категория ID</label>
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="price" checked> Цена</label>
+    {% for column in display_filter_columns %}
+      <label><input type="checkbox" class="js-col-visibility" data-col-id="filter_{{ forloop.counter0 }}" checked> {{ column.label }}</label>
+    {% endfor %}
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="description" checked> Описание</label>
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="actions" checked> Действия</label>
+  </div>
+  <table class="catalog-items-table catalog-items-table--expanded">
+    <thead>
+      <tr>
+        <th class="catalog-col" data-col-id="id">ID<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        <th class="catalog-col" data-col-id="sku">SKU<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        <th class="catalog-col" data-col-id="name">Название<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        <th class="catalog-col" data-col-id="category_id">Категория ID<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        <th class="catalog-col" data-col-id="price">Цена<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        {% for column in display_filter_columns %}
+          <th class="catalog-col" data-col-id="filter_{{ forloop.counter0 }}">{{ column.label }}<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        {% endfor %}
+        <th class="catalog-col" data-col-id="description">Описание<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        <th class="catalog-col" data-col-id="actions">Действия<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        {% with item_filters=item.display_filters|default_if_none:'' %}
+        <tr>
+          <td data-col-id="id"><div class="catalog-cell-resizable">{{ item.id|default:"—" }}</div></td>
+          <td data-col-id="sku">
+            {% if item.sku %}
+              <div class="catalog-cell-resizable">
+                <a href="{% url 'admin:catalog_item_details' item.sku %}">{{ item.sku }}</a>
+              </div>
+            {% else %}
+              <div class="catalog-cell-resizable">—</div>
+            {% endif %}
+          </td>
+          <td data-col-id="name"><div class="catalog-cell-resizable">{{ item.name }}</div></td>
+          <td data-col-id="category_id"><div class="catalog-cell-resizable">{{ item.category_id }}</div></td>
+          <td data-col-id="price"><div class="catalog-cell-resizable">{{ item.price }}</div></td>
+          {% for column in display_filter_columns %}
+            <td data-col-id="filter_{{ forloop.counter0 }}">
+              <div class="catalog-cell-resizable">{{ item_filters|get_item:column.key|default:"—" }}</div>
+            </td>
+          {% endfor %}
+          <td data-col-id="description"><div class="catalog-cell-resizable">{{ item.description|default:"—" }}</div></td>
+          <td data-col-id="actions">
+            <div class="catalog-cell-resizable catalog-row-actions">
+              {% if item.id %}
+                <a href="{% url 'admin:catalog_edit_item' %}?item_id={{ item.id }}">Редактировать</a>
+              {% endif %}
+              {% if item.sku %}
+                <a href="{% url 'admin:catalog_item_details' item.sku %}">Карточка</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p class="catalog-empty">Товары не найдены.</p>
+{% endif %}

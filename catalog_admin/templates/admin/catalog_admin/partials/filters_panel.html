@@ -1,0 +1,62 @@
+<div class="catalog-panel catalog-panel--filters">
+  <h3>Список фильтров</h3>
+  {% if filters_tree %}
+    <div class="filter-card-list">
+      {% for f in filters_tree %}
+        <section class="filter-card{% if f.is_active %} filter-card--active{% endif %}">
+          <br>
+          <div class="filter-card-title"><strong>{{ f.label }}</strong></div>
+          {% if f.use_range_slider %}
+            <div
+              class="filter-range js-filter-range{% if f.is_active_range %} filter-range--active{% endif %}"
+              data-filter-key="{{ f.key }}"
+            >
+              <label class="filter-range-control">
+                <span class="filter-range-name">Мин</span>
+                <input
+                  type="range"
+                  class="js-filter-range-min"
+                  min="{{ f.range_min }}"
+                  max="{{ f.range_max }}"
+                  step="{{ f.range_step }}"
+                  value="{{ f.selected_min }}"
+                >
+                <strong class="filter-range-current js-filter-range-min-label">{{ f.selected_min }}</strong>
+              </label>
+              <br>
+              <label class="filter-range-control">
+                <span class="filter-range-name">Макс</span>
+                <input
+                  type="range"
+                  class="js-filter-range-max"
+                  min="{{ f.range_min }}"
+                  max="{{ f.range_max }}"
+                  step="{{ f.range_step }}"
+                  value="{{ f.selected_max }}"
+                >
+                <strong class="filter-range-current js-filter-range-max-label">{{ f.selected_max }}</strong>
+              </label>
+            </div>
+          {% else %}
+            <div class="filter-chip-list">
+              {% for v in f.values %}
+                <button
+                  type="button"
+                  class="js-filter-value filter-value-btn{% if v.is_active %} filter-value-btn--active{% endif %}"
+                  data-filter-key="{{ f.key }}"
+                  data-filter-value="{{ v.value }}"
+                >
+                  <span>{{ v.display_value|default:v.value }}</span>
+                  <span class="filter-value-count">{{ v.count }}</span>
+                </button>
+                <br>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </section>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Нет фильтров в текущей выборке.</p>
+  {% endif %}
+</div>

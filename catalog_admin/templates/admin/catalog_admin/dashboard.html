@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="catalog-page">
+  <div class="catalog-panel">
+    <h1>Catalog API Admin</h1>
+    <p>Минимальная админка, которая работает через Go API.</p>
+
+    <ul>
+      <li><a href="{% url 'admin:catalog_items' %}">Список товаров</a></li>
+      <li><a href="{% url 'admin:catalog_add_item' %}">Добавить товар</a></li>
+      <li><a href="{% url 'admin:catalog_edit_item' %}">Редактировать товар (по item_id)</a></li>
+      <li><a href="{% url 'admin:suggest_filter' %}">Предложить новый фильтр</a></li>
+      <li><a href="{% url 'admin:filter_suggestions' %}">Модерация предложенных фильтров</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

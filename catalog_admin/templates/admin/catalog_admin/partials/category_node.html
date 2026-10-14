@@ -1,0 +1,37 @@
+<li>
+  <div class="category-row">
+    {% if node.children %}
+      <button
+        type="button"
+        class="js-category-toggle category-toggle-btn"
+        aria-expanded="false"
+      >▸</button>
+    {% else %}
+      <span class="category-placeholder">•</span>
+    {% endif %}
+    {% if selected_category_id|stringformat:'s' == node.id|stringformat:'s' %}
+      <button
+        type="button"
+        class="js-category-node category-node-btn category-node-btn--selected"
+        data-category-id="{{ node.id }}"
+      >
+        {{ node.name }}{% if node.product_count %} ({{ node.product_count }}){% endif %}
+      </button>
+    {% else %}
+      <button
+        type="button"
+        class="js-category-node category-node-btn"
+        data-category-id="{{ node.id }}"
+      >
+        {{ node.name }}{% if node.product_count %} ({{ node.product_count }}){% endif %}
+      </button>
+    {% endif %}
+  </div>
+  {% if node.children %}
+    <ul class="category-children" hidden>
+      {% for child in node.children %}
+        {% include "admin/catalog_admin/partials/category_node.html" with node=child selected_category_id=selected_category_id %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+</li>
