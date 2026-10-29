@@ -1,5 +1,11 @@
 (function () {
   const queryInput = document.getElementById("id_q");
+  // Курсор сразу в поиске: сканер штрихкодов «печатает» цифры и нажимает Enter, мышь не нужна.
+  // Текст выделяется, чтобы следующий скан заменил предыдущий.
+  if (queryInput) {
+    queryInput.focus({ preventScroll: true });
+    queryInput.select();
+  }
   const filterKeyInput = document.getElementById("id_filter_key_select");
   const filterValueInput = document.getElementById("id_filter_value_select");
   const filterMinInput = document.getElementById("id_filter_min");
@@ -300,6 +306,51 @@
     expandCategoryPathById(categoryInput.value);
   }
 
+  // Настройки таблицы (какие колонки скрыты, сжата ли она) запоминаются в браузере:
+  // каждый клик по фильтру перезагружает страницу, и раньше они сбрасывались.
+  const TABLE_PREFS_KEY = "catalog_admin_table_prefs";
+
+  function readTablePrefs() {
+    try {
+      const value = JSON.parse(localStorage.getItem(TABLE_PREFS_KEY) || "{}");
+      return value && typeof value === "object" ? value : {};
+    } catch (_err) {
+      return {};
+    }
+  }
+
+  // Колонки-характеристики нумеруются по позиции, а позиция меняется от выдачи к выдаче,
+  // поэтому для них ключом служит подпись.
+  function columnKey(checkbox) {
+    const colId = checkbox.dataset.colId || "";
+    if (!colId.startsWith("filter_")) return colId;
+    const label = checkbox.closest("label");
+    return "label:" + (label ? label.textContent.trim() : colId);
+  }
+
+  function saveTablePrefs() {
+    const table = document.querySelector(".catalog-items-table");
+    const photoCheckbox = document.querySelector('.js-col-visibility[data-col-id="photo"]');
+    const hidden = Array.from(document.querySelectorAll(".js-col-visibility"))
+      .filter((checkbox) => !checkbox.checked)
+      .map(columnKey);
+    try {
+      localStorage.setItem(
+        TABLE_PREFS_KEY,
+        JSON.stringify({
+          hidden,
+          // Колонка «Фото» по умолчанию скрыта: пока фото нет, там одни заглушки.
+          photo: photoCheckbox ? photoCheckbox.checked : false,
+          expanded: table ? table.classList.contains("catalog-items-table--expanded") : true,
+        })
+      );
+    } catch (_err) {
+      /* без хранилища всё работает как раньше */
+    }
+  }
+
+  const savedTablePrefs = readTablePrefs();
+
   const tableExpandBtn = document.getElementById("toggle_table_expand_btn");
   const itemsTable = document.querySelector(".catalog-items-table");
   if (tableExpandBtn && itemsTable) {
@@ -307,10 +358,14 @@
       const expanded = itemsTable.classList.contains("catalog-items-table--expanded");
       tableExpandBtn.textContent = expanded ? "Сжать колонки" : "Расширить колонки";
     };
+    if (typeof savedTablePrefs.expanded === "boolean") {
+      itemsTable.classList.toggle("catalog-items-table--expanded", savedTablePrefs.expanded);
+    }
     syncExpandButtonText();
     tableExpandBtn.addEventListener("click", () => {
       const expanded = itemsTable.classList.toggle("catalog-items-table--expanded");
       tableExpandBtn.textContent = expanded ? "Сжать колонки" : "Расширить колонки";
+      saveTablePrefs();
     });
   }
 
@@ -332,6 +387,7 @@
 
       columnPickerPanel.removeAttribute("hidden");
       columnPickerBtn.textContent = nextVisible ? "Скрыть колонки" : "Показать колонки";
+      saveTablePrefs();
     });
   }
 
@@ -346,11 +402,25 @@
   if (itemsTable) {
     document.querySelectorAll(".js-col-visibility").forEach((checkbox) => {
       const colId = checkbox.dataset.colId || "";
+      if (colId === "photo") {
+        checkbox.checked = savedTablePrefs.photo === true;
+      } else if (Array.isArray(savedTablePrefs.hidden)) {
+        checkbox.checked = !savedTablePrefs.hidden.includes(columnKey(checkbox));
+      }
       setColumnVisibility(itemsTable, colId, checkbox.checked);
       checkbox.addEventListener("change", () => {
         setColumnVisibility(itemsTable, colId, checkbox.checked);
+        saveTablePrefs();
       });
     });
+    if (columnPickerBtn) {
+      const optional = Array.from(
+        document.querySelectorAll('.js-col-visibility[data-col-id^="filter_"], .js-col-visibility[data-col-id="description"]')
+      );
+      if (optional.length && !optional.some((checkbox) => checkbox.checked)) {
+        columnPickerBtn.textContent = "Показать колонки";
+      }
+    }
   }
 
   function initColumnResize(table) {

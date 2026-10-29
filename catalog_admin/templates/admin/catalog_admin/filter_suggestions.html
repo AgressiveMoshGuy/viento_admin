@@ -8,8 +8,7 @@
   <div class="catalog-panel">
     <h1>Модерация предложенных фильтров</h1>
     <p class="catalog-lead">
-      Очередь из <code>GET /api/admin/filter-suggestions</code>.
-      Одобрение/отклонение — <code>POST /api/admin/filter-suggestions/{id}</code>.
+      Здесь собраны предложения новых фильтров: ждут решения, одобрены или отклонены.
     </p>
 
     <form method="get" class="catalog-moderation-filters">
@@ -17,13 +16,13 @@
         Статус
         <select name="status">
           <option value="" {% if not status %}selected{% endif %}>Все</option>
-          <option value="pending" {% if status == "pending" %}selected{% endif %}>pending</option>
-          <option value="approved" {% if status == "approved" %}selected{% endif %}>approved</option>
-          <option value="rejected" {% if status == "rejected" %}selected{% endif %}>rejected</option>
+          <option value="pending" {% if status == "pending" %}selected{% endif %}>Ждёт решения</option>
+          <option value="approved" {% if status == "approved" %}selected{% endif %}>Одобрено</option>
+          <option value="rejected" {% if status == "rejected" %}selected{% endif %}>Отклонено</option>
         </select>
       </label>
       <label>
-        Категория (slug)
+        Категория (латиницей)
         <input type="text" name="category" value="{{ category }}" placeholder="axial_fans">
       </label>
       <button type="submit">Фильтровать</button>
@@ -56,7 +55,7 @@
               <td><pre class="catalog-filters-json">{{ suggestion.suggested_values|pretty_json }}</pre></td>
               <td>
                 <span class="catalog-status catalog-status--{{ suggestion.status|default:'unknown' }}">
-                  {{ suggestion.status|default:"—" }}
+                  {% if suggestion.status == "pending" %}Ждёт решения{% elif suggestion.status == "approved" %}Одобрено{% elif suggestion.status == "rejected" %}Отклонено{% else %}{{ suggestion.status|default:"—" }}{% endif %}
                 </span>
               </td>
               <td class="catalog-actions-cell">
@@ -83,7 +82,7 @@
         </table>
       </div>
     {% else %}
-      <p class="catalog-empty">Предложений пока нет или API вернул пустой список.</p>
+      <p class="catalog-empty">Предложений пока нет.</p>
     {% endif %}
   </div>
 </div>

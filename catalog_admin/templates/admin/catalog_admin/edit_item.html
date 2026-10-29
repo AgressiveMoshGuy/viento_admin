@@ -7,31 +7,11 @@
   <div class="catalog-panel catalog-form-panel">
     <h1>Редактировать товар</h1>
     <p class="catalog-lead">
-      Укажите <code>item_id</code> и только поля, которые нужно обновить
-      (<code>POST /api/admin/items/edit/{item_id}</code>).
-      Из списка можно открыть форму с уже подставленным id.
+      Впишите ID товара и только те поля, которые нужно изменить. Пустые поля останутся как были.
+      Если открыть форму кнопкой «Редактировать» в списке, ID подставится сам.
     </p>
 
-    <form method="post" class="catalog-entity-form">
-      {% csrf_token %}
-      {% if form.non_field_errors %}
-        <div class="catalog-form-errors">{{ form.non_field_errors }}</div>
-      {% endif %}
-      <div class="catalog-form-grid catalog-form-grid--2">
-        {% for field in form %}
-          <div class="catalog-field{% if field.name in 'description,filters' %} catalog-field--full{% endif %}">
-            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-            {{ field }}
-            {% if field.help_text %}<p class="catalog-help">{{ field.help_text }}</p>{% endif %}
-            {% if field.errors %}<div class="catalog-field-errors">{{ field.errors }}</div>{% endif %}
-          </div>
-        {% endfor %}
-      </div>
-      <div class="catalog-form-actions">
-        <button type="submit">Сохранить</button>
-        <a class="catalog-secondary-link" href="{% url 'admin:catalog_items' %}">Отмена</a>
-      </div>
-    </form>
+    {% include "admin/catalog_admin/partials/item_form.html" with submit_label="Сохранить" %}
   </div>
 </div>
 {% endblock %}

@@ -12,10 +12,14 @@
         <a href="{% url 'admin:catalog_edit_item' %}?item_id={{ item.id }}">Редактировать</a>
         ·
       {% endif %}
+      {% if item %}<a href="{% url 'admin:catalog_add_item' %}?copy_from={{ sku|urlencode }}">Создать похожий</a> ·{% endif %}
       <a href="{% url 'admin:catalog_items' %}">К списку товаров</a>
     </p>
 
     {% if item %}
+      <div class="catalog-card-photo">
+        {% include "admin/catalog_admin/partials/photo_placeholder.html" with size="lg" hint="Загрузка фото появится позже." %}
+      </div>
       <table class="catalog-items-table">
         <tr><th>ID</th><td>{{ item.id }}</td></tr>
         <tr><th>SKU</th><td>{{ item.sku }}</td></tr>
@@ -27,7 +31,7 @@
         <tr><th>Вес</th><td>{{ item.weight }}</td></tr>
         <tr><th>Габариты</th><td>{{ item.height }} x {{ item.width }} x {{ item.length }}</td></tr>
         <tr><th>Цена</th><td>{{ item.price }}</td></tr>
-        <tr><th>Свойства (filters)</th><td><pre class="catalog-filters-json">{{ item.filters|pretty_json }}</pre></td></tr>
+        <tr><th>Свойства</th><td><pre class="catalog-filters-json">{{ item.filters|pretty_json }}</pre></td></tr>
       </table>
     {% else %}
       <p class="catalog-empty">Товар не получен.</p>

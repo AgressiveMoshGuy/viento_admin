@@ -1,8 +1,11 @@
 <div class="catalog-pagination-row">
   {% if has_prev %}
-    <a href="?q={{ form.q.value|default_if_none:'' }}&category_id={{ form.category_id.value|default_if_none:'' }}&filter_key={{ form.filter_key.value|default_if_none:'' }}&filter_value={{ form.filter_value.value|default_if_none:'' }}&filter_min={{ form.filter_min.value|default_if_none:'' }}&filter_max={{ form.filter_max.value|default_if_none:'' }}&filters_json={{ form.filters_json.value|default_if_none:''|urlencode }}&sort={{ form.sort.value|default_if_none:'name_asc' }}&limit={{ form.limit.value|default_if_none:'100' }}&page={{ prev_page }}">← Предыдущая</a>
+    <a href="?{{ prev_query }}">← Предыдущая</a>
+  {% endif %}
+  {% if total_pages > 1 %}
+    <span class="catalog-pagination-page">Страница {{ page }} из {{ total_pages }}</span>
   {% endif %}
   {% if has_next %}
-    <a href="?q={{ form.q.value|default_if_none:'' }}&category_id={{ form.category_id.value|default_if_none:'' }}&filter_key={{ form.filter_key.value|default_if_none:'' }}&filter_value={{ form.filter_value.value|default_if_none:'' }}&filter_min={{ form.filter_min.value|default_if_none:'' }}&filter_max={{ form.filter_max.value|default_if_none:'' }}&filters_json={{ form.filters_json.value|default_if_none:''|urlencode }}&sort={{ form.sort.value|default_if_none:'name_asc' }}&limit={{ form.limit.value|default_if_none:'100' }}&page={{ next_page }}">Следующая →</a>
+    <a href="?{{ next_query }}">Следующая →</a>
   {% endif %}
 </div>

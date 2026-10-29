@@ -1,0 +1,50 @@
+{% load static %}
+{# Общая форма товара с вкладками. Ожидает: form, tabs, submit_label. #}
+<form method="post" class="catalog-entity-form" data-tabbed-form>
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="catalog-form-errors">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <div class="catalog-tabs" role="tablist" aria-label="Разделы карточки товара">
+    {% for tab in tabs %}
+      <button type="button" role="tab" class="catalog-tab" id="tab-{{ tab.id }}"
+              aria-controls="panel-{{ tab.id }}" aria-selected="{% if tab.active %}true{% else %}false{% endif %}"
+              data-tab="{{ tab.id }}">
+        {{ tab.label }}{% if tab.error_count %} <span class="catalog-tab__badge" title="Есть ошибки в полях">{{ tab.error_count }}</span>{% endif %}
+      </button>
+    {% endfor %}
+  </div>
+
+  {% for tab in tabs %}
+    <section class="catalog-tab-panel" role="tabpanel" id="panel-{{ tab.id }}" aria-labelledby="tab-{{ tab.id }}"
+             data-panel="{{ tab.id }}"{% if not tab.active %} data-inactive{% endif %}>
+      <h2 class="catalog-tab-panel__title">{{ tab.label }}</h2>
+      {% if tab.fields %}
+        <div class="catalog-form-grid catalog-form-grid--2">
+          {% for field in tab.fields %}
+            <div class="catalog-field{% if field.name in tab.full %} catalog-field--full{% endif %}">
+              <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+              {{ field }}
+              {% if field.help_text %}<p class="catalog-help">{{ field.help_text }}</p>{% endif %}
+              {% if field.errors %}<div class="catalog-field-errors">{{ field.errors }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="catalog-tab-note">{{ tab.note }}</p>
+      {% endif %}
+    </section>
+  {% endfor %}
+
+  <div class="catalog-form-actions">
+    <button type="submit">{{ submit_label }}</button>
+    <a class="catalog-secondary-link" href="{% url 'admin:catalog_items' %}">Отмена</a>
+  </div>
+</form>
+{% if specs_schema %}
+  {{ specs_schema|json_script:"specs-schema" }}
+  {% if specs_items %}{{ specs_items|json_script:"specs-items" }}{% endif %}
+  <script src="{% static 'catalog_admin/specs_editor.js' %}?v=1" defer></script>
+{% endif %}
+<script src="{% static 'catalog_admin/item_form_tabs.js' %}?v=1" defer></script>

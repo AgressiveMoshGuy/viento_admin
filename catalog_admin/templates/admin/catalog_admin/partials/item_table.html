@@ -7,6 +7,7 @@
   </div>
   <div id="column_picker_panel" class="catalog-column-picker" hidden>
     <label><input type="checkbox" class="js-col-visibility" data-col-id="id" checked> ID</label>
+    <label><input type="checkbox" class="js-col-visibility" data-col-id="photo"> Фото</label>
     <label><input type="checkbox" class="js-col-visibility" data-col-id="sku" checked> SKU</label>
     <label><input type="checkbox" class="js-col-visibility" data-col-id="name" checked> Название</label>
     <label><input type="checkbox" class="js-col-visibility" data-col-id="category_id" checked> Категория ID</label>
@@ -21,6 +22,7 @@
     <thead>
       <tr>
         <th class="catalog-col" data-col-id="id">ID<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
+        <th class="catalog-col catalog-col-hidden" data-col-id="photo">Фото<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
         <th class="catalog-col" data-col-id="sku">SKU<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
         <th class="catalog-col" data-col-id="name">Название<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
         <th class="catalog-col" data-col-id="category_id">Категория ID<span class="catalog-col-resizer js-col-resizer" role="separator" aria-orientation="vertical"></span></th>
@@ -36,8 +38,9 @@
       {% for item in items %}
         {% with item_filters=item.display_filters|default_if_none:'' %}
         <tr>
-          <td data-col-id="id"><div class="catalog-cell-resizable">{{ item.id|default:"—" }}</div></td>
-          <td data-col-id="sku">
+          <td data-col-id="id" data-label="ID"><div class="catalog-cell-resizable">{{ item.id|default:"—" }}</div></td>
+          <td class="catalog-col-hidden" data-col-id="photo" data-label="Фото"><div class="catalog-cell-resizable">{% include "admin/catalog_admin/partials/photo_placeholder.html" with size="sm" %}</div></td>
+          <td data-col-id="sku" data-label="SKU">
             {% if item.sku %}
               <div class="catalog-cell-resizable">
                 <a href="{% url 'admin:catalog_item_details' item.sku %}">{{ item.sku }}</a>
@@ -46,22 +49,23 @@
               <div class="catalog-cell-resizable">—</div>
             {% endif %}
           </td>
-          <td data-col-id="name"><div class="catalog-cell-resizable">{{ item.name }}</div></td>
-          <td data-col-id="category_id"><div class="catalog-cell-resizable">{{ item.category_id }}</div></td>
-          <td data-col-id="price"><div class="catalog-cell-resizable">{{ item.price }}</div></td>
+          <td data-col-id="name" data-label="Название"><div class="catalog-cell-resizable">{{ item.name }}</div></td>
+          <td data-col-id="category_id" data-label="Категория ID"><div class="catalog-cell-resizable">{{ item.category_id }}</div></td>
+          <td data-col-id="price" data-label="Цена"><div class="catalog-cell-resizable">{{ item.price }}</div></td>
           {% for column in display_filter_columns %}
-            <td data-col-id="filter_{{ forloop.counter0 }}">
+            <td data-col-id="filter_{{ forloop.counter0 }}" data-label="{{ column.label }}">
               <div class="catalog-cell-resizable">{{ item_filters|get_item:column.key|default:"—" }}</div>
             </td>
           {% endfor %}
-          <td data-col-id="description"><div class="catalog-cell-resizable">{{ item.description|default:"—" }}</div></td>
-          <td data-col-id="actions">
+          <td data-col-id="description" data-label="Описание"><div class="catalog-cell-resizable">{{ item.description|default:"—" }}</div></td>
+          <td data-col-id="actions" data-label="">
             <div class="catalog-cell-resizable catalog-row-actions">
               {% if item.id %}
                 <a href="{% url 'admin:catalog_edit_item' %}?item_id={{ item.id }}">Редактировать</a>
               {% endif %}
               {% if item.sku %}
                 <a href="{% url 'admin:catalog_item_details' item.sku %}">Карточка</a>
+                <a href="{% url 'admin:catalog_add_item' %}?copy_from={{ item.sku|urlencode }}">Создать похожий</a>
               {% endif %}
             </div>
           </td>
@@ -71,5 +75,22 @@
     </tbody>
   </table>
 {% else %}
-  <p class="catalog-empty">Товары не найдены.</p>
+  <div class="catalog-empty">
+    {% if empty_reason == "error" %}
+      <strong>Список не загружен.</strong>
+      <p>Причина написана в красной полосе сверху. Попробуйте обновить страницу чуть позже.</p>
+    {% elif empty_reason == "invalid" %}
+      <strong>Проверьте параметры.</strong>
+      <p>Одно из полей поиска заполнено неверно. <a href="{% url 'admin:catalog_items' %}">Сбросить всё</a></p>
+    {% elif empty_reason == "page" %}
+      <strong>На этой странице товаров нет.</strong>
+      <p><a href="?{{ first_query }}">Вернуться к первой странице</a></p>
+    {% elif empty_reason == "filtered" %}
+      <strong>Ничего не найдено.</strong>
+      <p>Уберите часть условий над списком или <a href="{% url 'admin:catalog_items' %}">сбросьте всё</a>.</p>
+    {% else %}
+      <strong>В каталоге пока нет товаров.</strong>
+      <p><a href="{% url 'admin:catalog_add_item' %}">Добавить первый товар</a></p>
+    {% endif %}
+  </div>
 {% endif %}

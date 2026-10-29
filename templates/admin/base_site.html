@@ -5,7 +5,15 @@
 
 {% block extrastyle %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'catalog_admin/catalog_admin.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'catalog_admin/catalog_admin.css' %}?v=13">
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script src="{% static 'catalog_admin/loading.js' %}" defer></script>
 {% endblock %}
 
 {% block bodyclass %}{{ block.super }} catalog-theme{% endblock %}

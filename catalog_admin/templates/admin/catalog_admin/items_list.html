@@ -6,11 +6,35 @@
   {% include "admin/catalog_admin/partials/catalog_nav.html" %}
 
   <h1>Список товаров</h1>
-  <p class="catalog-lead">Каталог поверх Go API: поиск, категории, фасеты и пагинация.</p>
+  <p class="catalog-lead">Ищите товар по названию, штрихкоду или артикулу, либо выбирайте категорию и фильтры.</p>
 
   {% include "admin/catalog_admin/partials/item_search_form.html" %}
 
-  <p class="catalog-meta">Всего по API: {{ total }} | Страница: {{ page }}{% if total_pages %} / {{ total_pages }}{% endif %}</p>
+  {% if not load_failed %}
+    <p class="catalog-meta">
+      {% if has_conditions %}Найдено товаров: <strong>{{ total }}</strong>{% if catalog_total != total %} из {{ catalog_total }}{% endif %}{% else %}Товаров в каталоге: <strong>{{ total }}</strong>{% endif %}
+      {% if total_pages > 1 %} · страница {{ page }} из {{ total_pages }}{% endif %}
+      {% if fetched_at_label %} · данные от {{ fetched_at_label }} (<a href="?{{ refresh_query }}">обновить</a>){% endif %}
+    </p>
+    {% if short_query %}
+      <p class="catalog-hint">Поиск работает от двух символов, поэтому пока показаны все товары.</p>
+    {% endif %}
+    {% if barcode_hit %}
+      <div class="catalog-hit">
+        <strong>Найден по штрихкоду:</strong> {{ barcode_hit.name }}
+        <span class="catalog-hit__code">{{ barcode_hit.sku }}</span>
+        <a href="{% url 'admin:catalog_item_details' barcode_hit.sku %}">Открыть карточку</a>
+        {% if barcode_hit.id %}· <a href="{% url 'admin:catalog_edit_item' %}?item_id={{ barcode_hit.id }}">Редактировать</a>{% endif %}
+      </div>
+    {% endif %}
+    {% if active_conditions %}
+      <div class="catalog-active" aria-label="Выбранные условия">
+        <span class="catalog-active__title">Выбрано:</span>
+        {% for condition in active_conditions %}<span class="catalog-active__chip">{{ condition }}</span>{% endfor %}
+        <a class="catalog-secondary-link" href="{% url 'admin:catalog_items' %}">Сбросить всё</a>
+      </div>
+    {% endif %}
+  {% endif %}
 
   <div class="catalog-layout">
     {% include "admin/catalog_admin/partials/category_tree.html" %}
@@ -24,6 +48,7 @@
   </div>
 
   {{ filter_values_by_key|json_script:"filter-values-by-key" }}
-  <script src="{% static 'catalog_admin/items_list.js' %}" defer></script>
+  {# Номер версии в адресе заставляет браузеры взять свежий скрипт после обновления. Увеличивайте его при правках items_list.js. #}
+  <script src="{% static 'catalog_admin/items_list.js' %}?v=4" defer></script>
 </div>
 {% endblock %}
