@@ -2,6 +2,9 @@ import json
 
 from django import forms
 
+from .errors import describe_json_error
+from .quality import CHECKS
+
 
 class JSONTextareaField(forms.CharField):
     def to_python(self, value):
@@ -11,15 +14,28 @@ class JSONTextareaField(forms.CharField):
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise forms.ValidationError(f"Невалидный JSON: {exc}") from exc
+            raise forms.ValidationError(
+                f'Свойства записаны неверно. {describe_json_error(exc)} Пример: {{"diameter": 100}}'
+            ) from exc
         if not isinstance(parsed, dict):
-            raise forms.ValidationError("Ожидается JSON-объект (словарь).")
+            raise forms.ValidationError(
+                'Свойства должны быть объектом в фигурных скобках, например {"diameter": 100}.'
+            )
         return parsed
 
 
 class ItemSearchForm(forms.Form):
-    q = forms.CharField(label="Поиск", required=False)
+    q = forms.CharField(
+        label="Поиск",
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Название, штрихкод или артикул", "autocomplete": "off"}),
+    )
     category_id = forms.IntegerField(label="Категория ID", required=False, min_value=1)
+    issue = forms.ChoiceField(
+        label="Проблема",
+        required=False,
+        choices=[("", "")] + [(check.key, check.label) for check in CHECKS],
+    )
     filter_key = forms.CharField(label="Ключ фильтра", required=False)
     filter_value = forms.CharField(label="Значение фильтра", required=False)
     filter_min = forms.FloatField(label="Минимум фильтра", required=False)
@@ -46,14 +62,14 @@ class AddItemForm(forms.Form):
     category_id = forms.IntegerField(
         label="ID категории",
         min_value=1,
-        help_text="Числовой ID из дерева категорий (не slug).",
+        help_text="Число. Его видно в колонке «Категория ID» у товаров из этой категории.",
     )
     description = forms.CharField(label="Описание", required=False, widget=forms.Textarea)
     filters = JSONTextareaField(
-        label="Свойства (JSON)",
+        label="Свойства",
         required=False,
         widget=forms.Textarea(attrs={"rows": 6, "placeholder": '{"diameter": 100, "airflow": 130}'}),
-        help_text='Объект JSON, например {"diameter": 100}. Пусто = без свойств.',
+        help_text='Характеристики в фигурных скобках, например {"diameter": 100}. Если свойств нет, оставьте пустым.',
     )
     color = forms.CharField(label="Цвет", required=False)
     material = forms.CharField(label="Материал", required=False)
@@ -68,14 +84,14 @@ class EditItemForm(forms.Form):
     item_id = forms.IntegerField(
         label="ID товара",
         min_value=1,
-        help_text="Числовой id из списка товаров. Можно открыть форму ссылкой ?item_id=…",
+        help_text="Число из первой колонки списка товаров.",
     )
     name = forms.CharField(label="Название", max_length=255, required=False)
     sku = forms.CharField(label="SKU", max_length=128, required=False)
-    category_slug = forms.CharField(label="Slug категории", required=False)
+    category_slug = forms.CharField(label="Категория (латиницей)", required=False)
     description = forms.CharField(label="Описание", required=False, widget=forms.Textarea)
     filters = JSONTextareaField(
-        label="Свойства (JSON)",
+        label="Свойства",
         required=False,
         widget=forms.Textarea(attrs={"rows": 6}),
     )
@@ -90,12 +106,12 @@ class EditItemForm(forms.Form):
 
 class SuggestFilterForm(forms.Form):
     category_slug = forms.CharField(
-        label="Slug категории",
-        help_text="Например: axial_fans",
+        label="Категория (латиницей)",
+        help_text="Например: axial_fans. Так категория называется в системе.",
     )
     filter_key = forms.CharField(
         label="Ключ фильтра",
-        help_text="Латиница/snake_case, например airflow_noise",
+        help_text="Латиницей, слова через нижнее подчёркивание, например noise_level.",
     )
     filter_type = forms.ChoiceField(
         label="Тип",
@@ -108,10 +124,10 @@ class SuggestFilterForm(forms.Form):
     )
     filter_label = forms.CharField(label="Название фильтра")
     suggested_values = forms.CharField(
-        label="Предложенные значения (JSON массив)",
+        label="Предложенные значения",
         required=False,
         widget=forms.Textarea(attrs={"rows": 4, "placeholder": '["100", "125", "150"]'}),
-        help_text="Для enum — JSON-массив значений. Можно оставить пустым.",
+        help_text='Список значений в квадратных скобках, например ["100", "125"]. Можно оставить пустым.',
     )
 
     def clean_suggested_values(self):
@@ -121,7 +137,9 @@ class SuggestFilterForm(forms.Form):
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise forms.ValidationError(f"Невалидный JSON: {exc}") from exc
+            raise forms.ValidationError(
+                f'Значения записаны неверно. {describe_json_error(exc)} Пример: ["100", "125"]'
+            ) from exc
         if not isinstance(parsed, list):
-            raise forms.ValidationError("Ожидается JSON-массив.")
+            raise forms.ValidationError('Значения должны быть списком в квадратных скобках, например ["100", "125"].')
         return parsed

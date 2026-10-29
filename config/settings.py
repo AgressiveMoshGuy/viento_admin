@@ -77,10 +77,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+# У админки своя SQLite: пользователи, сессии и журнал Django. Товары живут в Go API (Postgres).
+# ADMIN_DB_PATH позволяет вынести файл в том Docker, чтобы данные переживали пересборку контейнера.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": os.getenv("ADMIN_DB_PATH") or BASE_DIR / "db.sqlite3",
     }
 }
 

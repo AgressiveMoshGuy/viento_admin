@@ -7,6 +7,7 @@
   <input type="hidden" name="filter_key" id="id_filter_key_select" value="{{ selected_filter_key }}">
   <input type="hidden" name="filter_value" id="id_filter_value_select" value="{{ selected_filter_value }}">
   <input type="hidden" name="category_id" id="id_category_id_select" value="{{ selected_category_id|default_if_none:'' }}">
+  <input type="hidden" name="issue" id="id_issue_hidden" value="{{ selected_issue }}">
   <input type="hidden" name="page" id="id_page_hidden" value="1">
   <input type="hidden" name="filter_min" id="id_filter_min" value="{{ selected_filter_min|default_if_none:'' }}">
   <input type="hidden" name="filter_max" id="id_filter_max" value="{{ selected_filter_max|default_if_none:'' }}">

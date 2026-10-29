@@ -36,12 +36,15 @@ def _get_urls():
             admin.site.admin_view(views.filter_suggestions),
             name="filter_suggestions",
         ),
+        # Шпаргалка для менеджера
+        path("catalog/help/", admin.site.admin_view(views.help_page), name="catalog_help"),
+        path("catalog/quality/", admin.site.admin_view(views.quality_dashboard), name="catalog_quality"),
     ]
     return custom_urls + urls
 
 
 admin.site.get_urls = _get_urls
-admin.site.site_header = "Catalog API Admin"
-admin.site.site_title = "Catalog API Admin"
+admin.site.site_header = "Каталог Viento"
+admin.site.site_title = "Каталог Viento"
 admin.site.index_title = "Управление каталогом"
 admin.site.index_template = "admin/catalog_admin/custom_index.html"

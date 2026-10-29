@@ -8,6 +8,7 @@ db.sqlite3
 staticfiles/
 .env
 .env.*
+!.env.example
 *.tar
 alpine-admin.tar
 .DS_Store

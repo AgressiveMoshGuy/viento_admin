@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="catalog-page">
+  {% include "admin/catalog_admin/partials/catalog_nav.html" %}
+
+  <h1>Качество каталога</h1>
+  <p class="catalog-lead">Здесь видно, где в карточках не хватает данных. Нажмите «Показать товары», чтобы открыть такие карточки в списке и дополнить их.</p>
+
+  {% if summary %}
+    <p class="catalog-meta">
+      Полностью заполнено: <strong>{{ summary.complete }}</strong> из {{ summary.total }}
+      · данные от {{ fetched_at_label }} (<a href="?refresh=1">обновить</a>)
+    </p>
+
+    <div class="catalog-quality-grid">
+      {% for row in summary.rows %}
+        <article class="catalog-quality-card{% if not row.count %} catalog-quality-card--ok{% endif %}">
+          <h2>{{ row.label }}</h2>
+          <p class="catalog-quality-card__count">{{ row.count }}<span> из {{ summary.total }}</span></p>
+          <div class="catalog-quality-card__bar" role="img" aria-label="{{ row.percent }}% товаров"><i style="width: {{ row.percent }}%"></i></div>
+          <p class="catalog-quality-card__hint">{% if row.count %}{{ row.hint }}{% else %}Здесь всё в порядке.{% endif %}</p>
+          {% if row.count %}<a class="catalog-quality-card__link" href="{% url 'admin:catalog_items' %}{{ row.link }}">Показать товары</a>{% endif %}
+        </article>
+      {% endfor %}
+      <article class="catalog-quality-card catalog-quality-card--later">
+        <h2>Без фото</h2>
+        <p class="catalog-quality-card__hint">Появится, когда на сервере будут храниться фото товаров.</p>
+      </article>
+      <article class="catalog-quality-card catalog-quality-card--later">
+        <h2>Черновики</h2>
+        <p class="catalog-quality-card__hint">Появится, когда у товара будет статус «черновик» или «опубликован».</p>
+      </article>
+    </div>
+  {% else %}
+    <div class="catalog-empty">
+      <strong>Проверка не выполнена.</strong>
+      <p>Причина написана в красной полосе сверху. Попробуйте обновить страницу чуть позже.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

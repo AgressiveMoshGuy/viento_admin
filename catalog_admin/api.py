@@ -7,9 +7,26 @@ from urllib.parse import urlparse, urlunparse
 import requests
 from django.conf import settings
 
+from .errors import KIND_CONNECTION, KIND_HTTP, KIND_TIMEOUT, ApiFailure, explain
+
 
 class GoAPIError(Exception):
-    pass
+    """Ошибка обращения к Go API.
+
+    str(exc) остаётся техническим текстом для логов. Менеджеру показывают explain().
+    """
+
+    def __init__(self, message: str, *, kind: str = KIND_HTTP, status: int | None = None, detail: str = ""):
+        super().__init__(message)
+        self.failure = ApiFailure(kind=kind, status=status, detail=detail)
+
+    def explain(self, action: str, not_found: str | None = None) -> str:
+        return explain(action, self.failure, not_found)
+
+
+def _connection_error(exc: requests.RequestException) -> GoAPIError:
+    kind = KIND_TIMEOUT if isinstance(exc, requests.Timeout) else KIND_CONNECTION
+    return GoAPIError(f"Ошибка соединения с Go API: {exc}", kind=kind, detail=str(exc))
 
 
 @dataclass
@@ -59,18 +76,25 @@ class GoCatalogApiClient:
                         **kwargs,
                     )
                 except requests.RequestException:
-                    raise GoAPIError(f"Ошибка соединения с Go API: {exc}") from exc
+                    raise _connection_error(exc) from exc
             else:
-                raise GoAPIError(f"Ошибка соединения с Go API: {exc}") from exc
+                raise _connection_error(exc) from exc
 
         if response.status_code >= 400:
             body = ""
             try:
                 data = response.json()
-                body = data.get("error") or data.get("message") or str(data)
+                if isinstance(data, dict):
+                    body = data.get("error") or data.get("message") or str(data)
+                else:
+                    body = str(data)
             except ValueError:
                 body = response.text
-            raise GoAPIError(f"Go API вернул {response.status_code}: {body}")
+            raise GoAPIError(
+                f"Go API вернул {response.status_code}: {body}",
+                status=response.status_code,
+                detail=str(body),
+            )
 
         if response.status_code == 204:
             return None

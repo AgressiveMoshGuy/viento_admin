@@ -1,0 +1,12 @@
+{# Единая заглушка «нет фото». Параметры: size ("sm" для списка, "lg" для карточки), hint (необязательно). #}
+<span class="catalog-photo catalog-photo--{{ size|default:'sm' }}" role="img" aria-label="Нет фото">
+  <svg class="catalog-photo__icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="14" rx="2"/>
+    <circle cx="9" cy="10.5" r="1.6"/>
+    <path d="M3.5 17.5l5-4.5 3.5 3 3-2.5 5.5 4.5"/>
+  </svg>
+  {% if size == "lg" %}
+    <span class="catalog-photo__text">Нет фото</span>
+    {% if hint %}<span class="catalog-photo__hint">{{ hint }}</span>{% endif %}
+  {% endif %}
+</span>

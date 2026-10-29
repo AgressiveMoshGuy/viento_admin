@@ -1,0 +1,30 @@
+# Локальный запуск админки в Docker.
+# У админки своя SQLite (пользователи, сессии, журнал). Файл лежит в томе admin_data,
+# поэтому данные переживают перезапуск и пересборку контейнера.
+#
+#   docker compose up --build
+#   docker compose exec admin python manage.py createsuperuser   # один раз
+#   docker compose down        # остановить, данные остаются
+#   docker compose down -v     # остановить и стереть том
+#
+# Адрес Go API и ключи можно задать в файле .env (см. .env.example).
+
+services:
+  admin:
+    build: .
+    container_name: admin-panel
+    environment:
+      ADMIN_DB_PATH: /data/db.sqlite3
+      # Go API, запущенный на этом же компьютере (docker compose в viento-main)
+      GO_API_BASE_URL: ${GO_API_BASE_URL:-http://host.docker.internal:8080/api}
+      GO_API_TOKEN: ${GO_API_TOKEN:-}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-secret-key}
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # на Linux нужно, на Mac и Windows уже есть
+    ports:
+      - "8001:8001"
+    volumes:
+      - admin_data:/data
+
+volumes:
+  admin_data:
